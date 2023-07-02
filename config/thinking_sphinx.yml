@@ -1,0 +1,19 @@
+default: &default
+  # address: <%= ENV.fetch('SPHINX_HOST') { 'database' } %>
+  address: 0.0.0.0
+  # host: localhost
+  # mysql41: 9312
+  mysql41: 9306
+  skip_running_check: true
+  configuration_file: 'config/sphinx.conf'
+  pid_file: "./log/searchd.development.pid"
+  binlog_path: "./tmp/binlog/development"
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+
+# bundle exec rails ts:configure --trace
+
+# exec searchd --nodetach --config /app/config/sphinx.conf
+
+# bundle exec rails ts:rebuild --trace
+# bundle exec rails ts:index --trace
+
+# bundle exec rails ts:rebuild --trace
+bundle exec rails ts:start --trace
+# bundle exec rails ts:index --trace
+
+# tail -f log/development.searchd.query.log -f log/development.searchd.log
+# exec searchd --nodetach --config /app/config/sphinx.conf

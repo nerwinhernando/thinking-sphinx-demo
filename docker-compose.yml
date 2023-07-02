@@ -1,0 +1,107 @@
+version: '3'
+services:
+  database:
+    platform: linux/x86_64
+    image: mysql:5.7
+    restart: always
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+    expose:
+      - '3306'
+      # - '9306'
+      # - '9312'
+    volumes:
+      - 'tsdemo_mysql_data:/var/lib/mysql'
+      - 'tsdemo_mysqld:/var/run/mysqld'
+    ports:
+      - "33061:3306"
+    logging:
+      driver: none
+
+  app:
+    platform: linux/x86_64
+    build: .
+    command: bundle exec rails server -p 3000 -b '0.0.0.0'
+    ports:
+      - "3000:3000"
+    expose:
+      - '3000'
+    environment:
+      DATABASE_HOST: database
+      DATABASE_USERNAME: root
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: demo_development
+      RAILS_ENV: development
+      SPHINX_HOST: 0.0.0.0
+    depends_on:
+      - database
+      - sphinx
+    volumes:
+      - ".:/app"
+      - 'tsdemo_mysqld:/var/run/mysqld'
+
+  # sphinx:
+  #   platform: linux/x86_64
+  #   container_name: tsdemo_sphinx
+  #   command: /app/bin/start-sphinx
+  #   image: stefobark/sphinxdocker
+  #   restart: always
+  #   depends_on:
+  #     - database
+  #   volumes:
+  #   - /app/config/sphinxy.conf:/etc/sphinxsearch/sphinxy.conf
+  #   - /app/sphinx:/var/lib/sphinx
+  sphinx:
+    platform: linux/x86_64
+    build:
+      context: .
+      dockerfile: SphinxDockerfile
+    # command: start_sphinx
+    restart: always
+    environment:
+      - SPHINX_CONFIG_FILE:/app/config/sphinx.conf
+      # - DATABASE_HOST:database
+      # - SPHINX_HOST:0.0.0.0
+    # expose:
+      # - '9306'
+      # - '9312'
+      # - '36307'
+    ports:
+      # - "127.0.0.1:36307:36307"
+      # - "36307:36307"
+      - "9306:9306"
+      # - "9311:9306"
+    depends_on:
+      - database
+    volumes:
+      - ".:/app"
+      - 'tsdemo_mysqld:/var/run/mysqld'
+      - ./data:/opt/sphinx/indexes
+  # search:
+  #   image: myepp
+  #   command: /app/bin/start-sphinx
+  #   environment:
+  #     DATABASE_HOST: mysql
+  #     DATABASE_USERNAME:
+  #     DATABASE_PASSWORD:
+  #     DATABASE_NAME:
+  #     RAILS_ENV:
+  #     SPHINX_HOST: 0.0.0.0
+  #   depends_on:
+  #     - db
+  sphonx:
+    image: jc21/sphinxsearch
+    ports:
+      - 9306:9306
+      - 9312:9312
+    volumes:
+      - "./sphinx.conf:/etc/sphinx/sphinx.conf"
+      - "./data:/var/lib/sphinx"
+
+volumes:
+  tsdemo_mysql_data: {}
+  tsdemo_mysqld: {}
+  app: {}

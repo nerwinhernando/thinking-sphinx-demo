@@ -1,0 +1,4 @@
+#!/bin/bash
+bundle exec rake ts:configure
+
+bundle exec rackup -o 0.0.0.0 -s puma -p 3000 -E $RAILS_ENV

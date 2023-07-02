@@ -1,0 +1,51 @@
+# FROM starefossen/ruby-node:2-4
+FROM --platform=linux/amd64 ruby:2.7.5
+ENV SPHINX_VERSION 3.4.1-efbcc65
+
+RUN apt-get update -qq && apt-get install -y \
+        default-mysql-client unixodbc libpq5 wget
+
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y nodejs \
+    npm
+
+RUN apt-get install -y nano build-essential && \
+    npm cache clean -f && \
+    npm install -g n && \
+    n stable && \
+    gem install bundler
+
+# set timezone
+# @see http://unix.stackexchange.com/a/76711
+RUN cp /usr/share/zoneinfo/CET /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata
+
+# set up and expose directories
+RUN mkdir -pv /opt/sphinx/log /opt/sphinx/index
+
+# http://sphinxsearch.com/files/sphinx-3.0.3-facc3fb-linux-amd64.tar.gz
+RUN wget http://sphinxsearch.com/files/sphinx-${SPHINX_VERSION}-linux-amd64.tar.gz -O /tmp/sphinxsearch.tar.gz
+RUN cd /opt/sphinx && tar -xf /tmp/sphinxsearch.tar.gz
+RUN rm /tmp/sphinxsearch.tar.gz
+
+# point to sphinx binaries
+ENV PATH "${PATH}:/opt/sphinx/sphinx-3.4.1/bin"
+RUN indexer -v
+
+WORKDIR /usr/src/app
+
+COPY Gemfile Gemfile.lock ./
+# COPY components ./components
+RUN bundle install
+
+COPY . .
+
+RUN chmod 755 start-sphinx
+COPY start-sphinx /usr/src/app/
+
+COPY ./config/thinking_sphinx.yml ./config/thinking_sphinx.yml
+
+EXPOSE 9306
+# EXPOSE 9312
+# EXPOSE 36307
+
+ENTRYPOINT ["/usr/src/app/start-sphinx"]
