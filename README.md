@@ -1,24 +1,33 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
+This demonstrates running sphinx-search with thinking-sphinx gem running in docker.
 
 * Ruby version
+2.7.5
+
+* Rails version
+7.0.5
+
+* Sphinx Search version
+3.2.1
+This is defined in the dockerfile.
 
 * System dependencies
-
-* Configuration
+docker
+docker-compose
 
 * Database creation
+rake db:create
 
 * Database initialization
+rake db:migrate
 
-* How to run the test suite
+* Initialization
+Terminal 1
+`docker compose down && docker compose build && docker compose up`
 
-* Services (job queues, cache servers, search engines, etc.)
+Terminal 2
+1. docker compose down && docker compose build && docker compose up
+`docker compose run app bash`
 
-* Deployment instructions
-
-* ...
+Terminal N
