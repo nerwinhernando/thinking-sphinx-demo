@@ -94,11 +94,22 @@ irb(main):003:0>
 ```
 
 # Problems encountered
-Make sure to EXPOSE in you docker-compose file!!!!
+These are my settings that worked!!!!
 
 ```
-    expose:
-      - "3306:3306"
-      - "9306:9306"
-      - "9312:9312"
+default: &default
+  # address: <%= ENV.fetch('SPHINX_HOST') { 'database' } %>
+  mysql41: 9312
+  configuration_file: "/app/config/sphinx.conf"
+  pid_file: "/app/log/searchd.development.pid"
+  binlog_path: "/app/tmp/binlog/development"
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default
 ```
